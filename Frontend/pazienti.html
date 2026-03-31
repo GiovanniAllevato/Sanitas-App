@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<title>Gestione pazienti</title>
+<link rel="stylesheet" href="style.css">
+
+</html>
+
+<body>
+
+    <div class="container">
+
+        <h1>Medical Center Sanitas</h1>
+
+        <h2>Gestione Pazienti</h2>
+
+        <button onclick="window.location.href='index.html'">
+            Torna alla Dashboard
+        </button>
+
+        <div class="card">
+
+            <h3>Aggiungi paziente</h3>
+
+            <input type="text" id="nome" placeholder="Nome">
+            <input type="text" id="cognome" placeholder="Cognome">
+            <button onclick="aggiungiPaziente()">Aggiungi</button>
+        </div>
+
+        <div class="card">
+            <h2>Lista pazienti</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Cognome</th>
+                        <th>Azione</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoPazienti"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

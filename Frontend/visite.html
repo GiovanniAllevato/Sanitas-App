@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gestione Visite</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Medical Center Sanitas</h1>
+
+        <h2>Gestione Visite Medici</h2>
+
+        <button onclick="window.location.href='index.html'">
+            Torna alla Dashboard
+        </button>
+
+        <div class="card">
+            <h2>Registra nuova visita</h2>
+
+            <div class="Form">
+
+                <label>Paziente:</label>
+                <select id="pazienteSelect">
+                    <option value="">-- Seleziona paziente --</option>
+                </select>
+
+                <label>Medico:</label>
+                <select id="medicoSelect">
+                    <option value="">-- Seleziona medico --</option>
+                </select>
+
+                <label>Data visita:</label>
+                <input type="date" id="dataVisita">
+
+                <label>Diagnosi:</label>
+                <input type="text" id="diagnosi">
+
+                <button onclick="aggiungiVisita()">Salva Visita</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Lista Visite</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Paziente</th>
+                        <th>Medico</th>
+                        <th>Data</th>
+                        <th>Diagnosi</th>
+                        <th>Azione</th>
+                    </tr>
+                </thead>
+
+                <tbody id="corpoVisite"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
