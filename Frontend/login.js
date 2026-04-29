@@ -32,11 +32,12 @@ function login() {
         .then(data => {
             console.log("DATA:", data);
 
-            if (data.success) {
+            if (data.token) {
                 localStorage.setItem("token", data.token);
+                localStorage.setItem("ruolo", data.ruolo);
                 window.location.href = "index.html";
             } else {
-                document.getElementById("errore").innerText = "Login fallito";
+                document.getElementById("errore").innerText = data.error || "Login fallito";
             }
         })
         .catch(error => {

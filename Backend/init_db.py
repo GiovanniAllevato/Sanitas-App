@@ -1,57 +1,52 @@
 import sqlite3
 
 conn = sqlite3.connect("pazienti.db")
-cursor = conn.cursor()
 
-# Tabella utenti (login)
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS utenti (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    password TEXT NOT NULL
-)
-""")
 
-# Tabella pazienti
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS pazienti (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT NOT NULL,
-    cognome TEXT NOT NULL,
-    data_nascita TEXT
-)
-""")
+def init_db():
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS pazienti (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        cognome TEXT NOT NULL
+    )"""
+    )
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS medici (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        cognome TEXT NOT NULL,
+        specializzazione TEXT NOT NULL
+    )"""
+    )
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS visite (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        paziente_id INTEGER NOT NULL,
+        medico_id INTEGER NOT NULL,
+        data_visita TEXT NOT NULL,
+        diagnosi TEXT NOT NULL,
+        FOREIGN KEY (paziente_id) REFERENCES pazienti(id),
+        FOREIGN KEY (medico_id) REFERENCES medici(id)
+    )"""
+    )
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS utenti (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        ruolo TEXT NOT NULL DEFAULT 'medico'
+    )"""
+    )
+    existing = conn.execute("SELECT id FROM utenti WHERE username = 'admin'").fetchone()
+    if not existing:
+        conn.execute(
+            "INSERT INTO utenti (username, password, ruolo) VALUES (?, ?, ?)",
+            ("admin", "password", "admin"),
+        )
+    conn.commit()
+    conn.close()
 
-# Tabella medici
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS medici (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT NOT NULL,
-    cognome TEXT NOT NULL,
-    specializzazione TEXT
-)
-""")
 
-# Tabella visite
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS visite (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    paziente_id INTEGER,
-    medico_id INTEGER,
-    data_visita TEXT,
-    diagnosi TEXT,
-    FOREIGN KEY (paziente_id) REFERENCES pazienti(id),
-    FOREIGN KEY (medico_id) REFERENCES medici(id)
-)
-""")
-
-# Creazione utente admin
-cursor.execute("""
-INSERT INTO utenti (username, password)
-VALUES ('admin', 'admin123')
-""")
-
-conn.commit()
-conn.close()
-
+init_db()
 print("Database clinica creato con successo")

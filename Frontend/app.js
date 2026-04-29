@@ -11,6 +11,12 @@ window.onload = function () {
         return;
     }
 
+    // Mostra il bottone Gestione Utenti solo agli admin
+    if (localStorage.getItem("ruolo") === "admin") {
+        const btn = document.getElementById("btnUtenti");
+        if (btn) btn.style.display = "inline-block";
+    }
+
     if (document.getElementById("tabellaPazienti")) {
         caricaPazienti();
     }
@@ -46,7 +52,7 @@ function caricaPazienti() {
                         <td>${p.nome}</td>
                         <td>${p.cognome}</td>
                         <td>
-                            <button onclick="eliminaPaziente(${p.id})">Elimina</button>
+                            <button onclick="eliminaPaziente(${p.id})">Elimina</button> <button onclick="modificaPaziente(${p.id}, '${p.nome}', '${p.cognome}')">Modifica</button>
                         </td>
                     </tr>
                     `;
@@ -92,6 +98,24 @@ function aggiungiPaziente() {
         });
 }
 
+function modificaPaziente(id, nomeAttuale, cognomeAttuale) {
+    const nuovoNome = prompt('Nuovo nome:', nomeAttuale);
+    if (nuovoNome === null) return;
+    const nuovoCognome = prompt('Nuovo cognome:', cognomeAttuale);
+    if (nuovoCognome === null) return;
+
+    authFetch(API_URL + "/pazienti/" + id, {
+        method: 'PUT',
+        body: JSON.stringify({ nome: nuovoNome, cognome: nuovoCognome })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message || data.error);
+        caricaPazienti(); // ricarica la tabella
+    })
+    .catch(() => alert('Errore nella modifica'));
+}
+
 function eliminaPaziente(id) {
 
     if (!confirm("Sei sicuro di voler eliminare questo paziente?")) {
@@ -134,9 +158,8 @@ function caricaMedici() {
                         <td>${medico.cognome}</td>
                         <td>${medico.specializzazione}</td>
                         <td>
-                            <button onclick="eliminaMedico(${medico.id})">
-                                Elimina
-                            </button>
+                            <button onclick="eliminaMedico(${medico.id})">Elimina</button>
+                            <button onclick="modificaMedico(${medico.id}, '${medico.nome}', '${medico.cognome}', '${medico.specializzazione}')">Modifica</button>
                         </td>
                     </tr>
                 `;
@@ -196,6 +219,30 @@ function eliminaMedico(id) {
     });
 }
 
+function modificaMedico(id, nomeAttuale, cognomeAttuale, specializzazioneAttuale) {
+    const nuovoNome = prompt('Nuovo nome:', nomeAttuale);
+    if (nuovoNome === null) return;
+    const nuovoCognome = prompt('Nuovo cognome:', cognomeAttuale);
+    if (nuovoCognome === null) return;
+    const nuovaSpecializzazione = prompt('Nuova specializzazione:', specializzazioneAttuale);
+    if (nuovaSpecializzazione === null) return;
+
+    authFetch(API_URL + "/medici/" + id, {
+        method: 'PUT',
+        body: JSON.stringify({
+            nome: nuovoNome,
+            cognome: nuovoCognome,
+            specializzazione: nuovaSpecializzazione
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message || data.error);
+        caricaMedici();
+    })
+    .catch(() => alert('Errore nella modifica'));
+}
+
 
 function caricaVisite() {
 
@@ -217,9 +264,8 @@ function caricaVisite() {
                 <td>${visita.data_visita}</td>
                 <td>${visita.diagnosi}</td>
                 <td>
-                    <button onclick="eliminaVisita(${visita.id})">
-                        Elimina
-                    </button>
+                    <button onclick="eliminaVisita(${visita.id})">Elimina</button>
+                    <button onclick="modificaVisita(${visita.id}, ${visita.paziente_id}, ${visita.medico_id}, '${visita.data_visita}', '${visita.diagnosi}')">Modifica</button>
                 </td>
                    ` ;
 
@@ -360,6 +406,31 @@ function eliminaVisita(id) {
 
         });
 
+}
+
+function modificaVisita(id, pazienteIdAttuale, medicoIdAttuale, dataAttuale, diagnosiAttuale) {
+    const nuovaData = prompt('Nuova data visita (YYYY-MM-DD):', dataAttuale);
+    if (nuovaData === null) return;
+    const nuovaDiagnosi = prompt('Nuova diagnosi:', diagnosiAttuale);
+    if (nuovaDiagnosi === null) return;
+
+    // Per semplicità manteniamo paziente e medico invariati;
+    // l'utente può cambiare solo data e diagnosi tramite prompt
+    authFetch(API_URL + "/visite/" + id, {
+        method: 'PUT',
+        body: JSON.stringify({
+            paziente_id: pazienteIdAttuale,
+            medico_id: medicoIdAttuale,
+            data_visita: nuovaData,
+            diagnosi: nuovaDiagnosi
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message || data.error);
+        caricaVisite();
+    })
+    .catch(() => alert('Errore nella modifica'));
 }
 
 

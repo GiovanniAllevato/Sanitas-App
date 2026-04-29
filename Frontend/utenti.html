@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestione Utenti – Sanitas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Medical Center Sanitas</h1>
+        <h2>Gestione Utenti</h2>
+        <button onclick="location.href='index.html'">Torna alla Dashboard</button>
+
+        <h3>Aggiungi utente</h3>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <select id="ruolo">
+            <option value="medico">Medico</option>
+            <option value="receptionist">Receptionist</option>
+            <option value="admin">Admin</option>
+        </select>
+        <button onclick="aggiungiUtente()">Crea utente</button>
+
+        <h3>Lista utenti</h3>
+        <table id="tabellaUtenti">
+            <thead>
+                <tr><th>ID</th><th>Username</th><th>Ruolo</th><th>Azione</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_URL = "http://127.0.0.1:5000";
+        // Controlla che l'utente sia admin
+        const ruolo = localStorage.getItem('ruolo');
+        if (ruolo !== 'admin') {
+            alert('Accesso negato: questa pagina è riservata agli amministratori.');
+            location.href = 'index.html';
+        }
+
+        function caricaUtenti() {
+            authFetch(API_URL + '/utenti')
+                .then(res => res.json())
+                .then(utenti => {
+                    const tbody = document.querySelector('#tabellaUtenti tbody');
+                    tbody.innerHTML = '';
+                    utenti.forEach(u => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${u.id}</td>
+                                <td>${u.username}</td>
+                                <td>${u.ruolo}</td>
+                                <td><button onclick="eliminaUtente(${u.id})">Elimina</button></td>
+                            </tr>`;
+                    });
+                });
+        }
+
+        function aggiungiUtente() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const ruolo = document.getElementById('ruolo').value;
+            if (!username || !password) { alert('Compila tutti i campi'); return; }
+
+            authFetch(API_URL + '/utenti', {
+                method: 'POST',
+                body: JSON.stringify({ username, password, ruolo })
+            })
+            .then(res => res.json())
+            .then(data => { alert(data.message || data.error); caricaUtenti(); });
+        }
+
+        function eliminaUtente(id) {
+            if (!confirm('Eliminare questo utente?')) return;
+            authFetch(API_URL + `/utenti/${id}`, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(data => { alert(data.message || data.error); caricaUtenti(); });
+        }
+
+        // Salva il ruolo al momento del login (in login.html, dopo il fetch /login)
+        // localStorage.setItem('ruolo', data.ruolo);
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('token');
+            return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+        }
+
+        function authFetch(url, options = {}) {
+            return fetch(url, { ...options, headers: { ...getAuthHeaders(), ...options.headers } })
+                .then(handleAuthError);
+        }
+
+        function handleAuthError(res) {
+            if (res.status === 401) { location.href = 'login.html'; }
+            if (res.status === 403) { alert('Accesso negato: permessi insufficienti'); }
+            return res;
+        }
+
+        caricaUtenti();
+    </script>
+</body>
+</html>
